@@ -7,47 +7,38 @@ using namespace std;
 #include <cstring>
 #include <chrono>
 
+// shared state
+string marquee_text = "Welcome to CSOPESY";
+int marquee_speed = 100;
+bool marquee_active = false;
+size_t display_width = 40;
 
 //Marquee logic – handles the animation logic for the marquee text
-void marquee_logic_thread(string text, int speed, bool status, size_t display_width) {
+void marquee_logic_thread() {
     int direction = 1;
-    size_t x = 0;
+    size_t x = 0;       // current position
+    while (true) {
+        if (!marquee_active) {
+            this_thread::sleep_for(chrono::milliseconds(100));
+            continue;
+        }
+        cout << "\r"; // return to line start
 
-    while (status) {
-        #ifdef _WIN32
-            system("cls");
-        #else
-            system("clear");
-        #endif
-
-        // Draw the display line
         for (size_t i = 0; i < display_width; ++i) {
-            if (i >= x && i < x + text.length())
-                cout << text[i - x];
+            if (i >= x && i < x + marquee_text.length())
+                cout << marquee_text[i - x];
             else
                 cout << " ";
         }
+        
+        cout.flush(); 
+        this_thread::sleep_for(chrono::milliseconds(marquee_speed));
 
-        cout << "\r"; // return to start of line
-        this_thread::sleep_for(chrono::milliseconds(speed));
-
-        // Bounce logic
-        if (x + text.length() >= display_width) direction = -1;
+        if (x + marquee_text.length() >= display_width) direction = -1;
         if (x == 0) direction = 1;
-
         x += direction;
     }
 }
-
-
-        /*
-        for (int i = 0; i < text.length(); i++){
-            cout << text[i];
-            this_thread::sleep_for(chrono::milliseconds(speed));        //what does this do?
-            //end after it finishes printing the whole text
-            //bounce
-        }
-            */
 
 // Command interpreter – accepts command and control the marquee logic
 void command_interpreter_thread(string input) {
@@ -61,8 +52,7 @@ void command_interpreter_thread(string input) {
         cout << "“exit” – terminates the console\n" <<endl;
     } 
     else if (input == "start_marquee"){
-        thread marqueeThread(marquee_logic_thread, string ("Welcome to CSOPESY"), 1, true, 40);  //thread for marquee animation
-        marqueeThread.join();
+        marquee_active = true;
     }
     else if (input == "exit"){
         cout << "Exiting program...\n";
@@ -75,7 +65,8 @@ void command_interpreter_thread(string input) {
 
 // Display handler – handles the display for the command interpreter and marquee logic
 void display_handler_thread() {
-    //i want maruee logic to play here
+    thread marqueeThread(marquee_logic_thread);
+    marqueeThread.detach();
 
     cout << "Group developer:" <<endl;
     cout << "CISNEROS, JOHN MAVERICK ZARAGOSA\nILUSTRE, SOPHIA MACAPINLAC\nJOCSON, VINCE MIGUEL\nVERGARA, ROYCE AARON ADAM\n" <<endl;
