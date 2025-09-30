@@ -6,12 +6,26 @@ using namespace std;
 #include <cstdio>
 #include <cstring>
 #include <chrono>
+#include <sstream>
+#include <vector>
+#include <string>
 
 // shared state
 string marquee_text = "Welcome to CSOPESY";
 int marquee_speed = 100;
 bool marquee_active = false;
 size_t display_width = 40;
+
+//HELPER FUNCTION - TOKENIZER
+vector<string> tokenize_input(const string& input) {
+    vector<string> tokens;
+    istringstream iss(input);
+    string token;
+    while (iss >> token) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
 
 //Marquee logic – handles the animation logic for the marquee text
 void marquee_logic_thread() {
@@ -42,29 +56,67 @@ void marquee_logic_thread() {
 
 // Command interpreter – accepts command and control the marquee logic
 void command_interpreter_thread(string input) {
-    if (input == "help") {
+    vector<string> tokens = tokenize_input(input);
+    if (tokens[0] == "help") {
         cout << "List of commands:\n";
-        cout << "“help” – displays the commands and its description\n";
-        cout << "“start_marquee” – starts the marquee “animation”\n";
-        cout << "“stop_marquee” – stops the marquee “animation”\n";
-        cout << "“set_text” – accepts a text input and displays it as a marquee\n";
-        cout << "“set_speed” – sets the marquee animation refresh in milliseconds\n";
-        cout << "“exit” – terminates the console\n" <<endl;
+        cout << "\"help\" displays the commands and its description\n";
+        cout << "\"start_marquee\" starts the marquee \"animation\"\n";
+        cout << "\"stop_marquee\" stops the marquee \"animation\"\n";
+        cout << "\"set_text <text_input>\" accepts a text input and displays it as a marquee\n";
+        cout << "\"set_speed <milliseconds>\" sets the marquee animation refresh in milliseconds\n";
+        cout << "\"exit\" terminates the console\n" <<endl;
     } 
-    else if (input == "start_marquee"){
-        marquee_active = true;
+    else if (tokens[0] == "start_marquee"){
+        if(marquee_active == true) {
+            cout << "Marquee is already running.\n\n";
+        }
+        else
+            marquee_active = true;
     }
-    else if (input == "stop_marquee"){
-        marquee_active = false;
+    else if (tokens[0] == "stop_marquee"){
+        if(marquee_active == false) {
+            cout << "Marquee is not currently running.\n\n";
+        }
+        else
+            marquee_active = false;
     }
-    //set speed 
+     
     //set text 
-    else if (input == "exit"){
-        cout << "Exiting program...\n";
+    else if (tokens[0] == "set_text"){
+        if (tokens.size() > 1) {
+            string new_text;
+            for (size_t i = 1; i < tokens.size(); ++i) {
+                new_text += tokens[i];
+                if (i != tokens.size() - 1) 
+                    new_text += " ";
+            }
+            marquee_text = new_text;
+        }
+        else {
+            cout << "Error: No text provided.\n\n";
+        }
+    }
+    //set speed
+    else if (tokens[0] == "set_speed"){
+        if (tokens.size() > 1) {
+            int speed = stoi(tokens[1]);
+            if (speed < 0) {
+                cout << "Error: Speed must be a positive number.\n\n";
+            } 
+            else {
+                marquee_speed = speed;
+            }
+        }
+        else {
+            cout << "Error: No speed value provided.\n\n";
+        }
+    }
+    else if (tokens[0] == "exit"){
+        cout << "Exiting program...\n\n";
         exit(0);
     }
     else {
-        cout << "Unknown command. Type 'help' to see the list of commands.";
+        cout << "Unknown command. Type 'help' to see the list of commands.\n\n";
     }
 }
 
@@ -77,7 +129,6 @@ void display_handler_thread() {
     cout << "CISNEROS, JOHN MAVERICK ZARAGOSA\nILUSTRE, SOPHIA MACAPINLAC\nJOCSON, VINCE MIGUEL\nVERGARA, ROYCE AARON ADAM\n" <<endl;
 
     cout << "Version date:\n" <<endl;
-    cout << "Command> ";
 
     //layout and design of the console
 }
@@ -101,7 +152,8 @@ int main () {
     while(is_running){
 
         //call thread functions
-        cin >> input;
+        cout << "Command> "; // Ask for input
+        getline(cin, input);
         thread commandThread(command_interpreter_thread, input);
         commandThread.join();       //so main doesnt end 
     }
