@@ -14,7 +14,7 @@ using namespace std;
 string marquee_text = "Welcome to CSOPESY";
 int marquee_speed = 100;
 bool marquee_active = false;
-size_t display_width = 40;
+size_t display_width = 100;
 
 //HELPER FUNCTION - TOKENIZER
 vector<string> tokenize_input(const string& input) {
@@ -67,14 +67,14 @@ void command_interpreter_thread(string input) {
         cout << "\"exit\" terminates the console\n" <<endl;
     } 
     else if (tokens[0] == "start_marquee"){
-        if(marquee_active == true) {
+        if(marquee_active) {
             cout << "Marquee is already running.\n\n";
         }
         else
             marquee_active = true;
     }
     else if (tokens[0] == "stop_marquee"){
-        if(marquee_active == false) {
+        if(!marquee_active) {
             cout << "Marquee is not currently running.\n\n";
         }
         else
@@ -95,6 +95,22 @@ void command_interpreter_thread(string input) {
         else {
             cout << "Error: No text provided.\n\n";
         }
+
+        //ALTERNATIVE METHOD THAT CAN ACCEPT ASCII ART. NOT SURE HOW TO IMPLEMENT ON MARQUEE LOGIC
+        /*string new_text;
+        cout << "Enter new marquee text or ASCII art. (type 'END' on a new line to finish):\n";
+        while (true) {
+            string line;
+            getline(cin, line);
+            if (line == "END") 
+                break;
+            new_text += line + "\n";
+        }
+        if (!new_text.empty()) {
+            marquee_text = new_text;
+        } else {
+            cout << "Error: No text provided.\n\n";
+        }*/
     }
     //set speed
     else if (tokens[0] == "set_speed"){
