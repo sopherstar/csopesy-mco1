@@ -54,6 +54,11 @@ void command_interpreter_thread(string input) {
     else if (input == "start_marquee"){
         marquee_active = true;
     }
+    else if (input == "stop_marquee"){
+        marquee_active = false;
+    }
+    //set speed 
+    //set text 
     else if (input == "exit"){
         cout << "Exiting program...\n";
         exit(0);
