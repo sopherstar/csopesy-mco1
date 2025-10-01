@@ -4,7 +4,7 @@ ILUSTRE, SOPHIA MACAPINLAC\
 JOCSON, VINCE MIGUEL\
 VERGARA, ROYCE AARON ADAM\
 
-<b> Source Code is in the new branch </b>
+<b> Source Code is 'main.cpp' in the new branch </b>
 
 To run in an IDE:\
 Compile and Run the Program\
