@@ -14,8 +14,8 @@ Input a command from the list of available commands:\
 "stop_marquee" stops the marquee "animation"\
 "set_text <text_input>" accepts a text input and displays it as a marquee\
 "set_speed <milliseconds>" sets the marquee animation refresh in milliseconds\
-"exit" terminates the console\
+"exit" terminates the console
 
 To run in the command in the command prompt:\
 Input 'g++ main.cpp -o main.exe'\
-Input 'main.exe'\
+Input 'main.exe'
