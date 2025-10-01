@@ -9,12 +9,17 @@ using namespace std;
 #include <sstream>
 #include <vector>
 #include <string>
+#include <conio.h>
+#include <queue>
+#include <mutex>
 
 // shared state
 string marquee_text = "Welcome to CSOPESY";
 int marquee_speed = 100;
 bool marquee_active = false;
 size_t display_width = 100;
+std::queue<char> key_buffer;
+std::mutex key_buffer_mutex;
 
 //HELPER FUNCTION - TOKENIZER
 vector<string> tokenize_input(const string& input) {
@@ -152,28 +157,52 @@ void display_handler_thread() {
 // Keyboard handler – handles keyboard buffering and polling
 
 void keyboard_handler_thread() {
+    while (true) {
+        if (_kbhit()) {
+            char ch = _getch();
+            std::lock_guard<std::mutex> lock(key_buffer_mutex);
+            key_buffer.push(ch); // Buffer the key press
+        }
+        this_thread::sleep_for(chrono::milliseconds(50));
+    }
 }
 
-//main
 int main () {
     string input;
     bool is_running = true;
 
-    //start threads
-
-    //start programs
     thread displayThread(display_handler_thread);
-    displayThread.join();        //so main doesnt end
+    thread keyboardThread(keyboard_handler_thread);
 
+    cout << "Command> ";
     while(is_running){
-
-        //call thread functions
-        cout << "Command> "; // Ask for input
-        getline(cin, input);
-        thread commandThread(command_interpreter_thread, input);
-        commandThread.join();       //so main doesnt end 
+        // start of command input for buffered keys
+        {
+            std::lock_guard<std::mutex> lock(key_buffer_mutex);
+            while (!key_buffer.empty()) {
+                char ch = key_buffer.front();
+                key_buffer.pop();
+                if (ch == '\r') { // enter
+                    cout << endl;
+                    thread commandThread(command_interpreter_thread, input);
+                    commandThread.join();
+                    input.clear();
+                    cout << "Command> ";
+                } else if (ch == '\b') { // backspace
+                    if (!input.empty()) {
+                        input.pop_back();
+                        cout << "\b \b";
+                    }
+                } else if (isprint(ch)) {
+                    input += ch;
+                    cout << ch;
+                }
+            }
+        }
+        this_thread::sleep_for(chrono::milliseconds(50));
     }
 
-
+    displayThread.join();
+    keyboardThread.join();
     return 0;
 }
