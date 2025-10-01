@@ -151,6 +151,7 @@ void display_handler_thread() {
 
     cout << "Version date:\n" <<endl;
 
+    cout << "Type 'help' to see the list of commands.\n\n";
     //layout and design of the console
 }
 
@@ -182,6 +183,7 @@ int main () {
             while (!key_buffer.empty()) {
                 char ch = key_buffer.front();
                 key_buffer.pop();
+                std::cout << "\nKey pressed: " << ch << std::endl;
                 if (ch == '\r') { // enter
                     cout << endl;
                     thread commandThread(command_interpreter_thread, input);
